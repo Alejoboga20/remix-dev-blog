@@ -1,4 +1,4 @@
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useTransition } from "@remix-run/react";
 import type { ActionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
@@ -9,6 +9,8 @@ const inputClassName = `w-full rounded border border-gray-500 px-2 py-1 text-lg`
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
+
+  await new Promise((res) => setTimeout(res, 1000));
 
   const title = formData.get("title");
   const slug = formData.get("slug");
@@ -35,7 +37,10 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 const NewPost = () => {
+  const transition = useTransition();
   const errors = useActionData<typeof action>();
+
+  const isCreating = Boolean(transition.submission);
 
   return (
     <Form method="post">
@@ -75,9 +80,10 @@ const NewPost = () => {
       <div className="text-right">
         <button
           type="submit"
+          disabled={isCreating}
           className="rounded bg-blue-500 py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400 disabled:bg-blue-300"
         >
-          Create Post
+          {isCreating ? "Creating..." : "Create Post"}
         </button>
       </div>
     </Form>
